@@ -2,6 +2,10 @@ venv
 psycopg2
 flask
 UserAccounts
+Bcrypt
+.env
+__pycache__
+flask-cors
 
 world-bank-connect/venv
 python-dotenv
