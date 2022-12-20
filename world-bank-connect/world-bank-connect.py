@@ -16,8 +16,15 @@ WB_PASSWORD = os.getenv('WB_PASSWORD')
 WB_USERNAME = os.getenv('WB_USERNAME')
 
 
-def get_bank_connection():
+def validate_data(data):
+    if len(data) == 0:
+        return 'LENGTH=0'
+    if len(data['indicator']) == 0:
+        return 'NOINDICATORS'
+    return 'OKAY'
 
+
+def get_bank_connection():
     try:
         conn = conn = psycopg2.connect(
             f"dbname={WB_DBNAME} user={WB_USERNAME} host={WB_HOST} port = 5432 password={WB_PASSWORD}")
@@ -26,18 +33,42 @@ def get_bank_connection():
         return False
 
 
-@app.route('/', methods=['GET'])  # POST
-def main():
+def query_bank_db(query, params=()):
+    conn = get_bank_connection()
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+        cursor.execute(query, params)
+        data = cursor.fetchall()
+    return data
+
+
+@app.route('/search', methods=['GET', 'POST'])  # POST
+def search():
+    error_handler = {'OKAY': '', 'NOINDICATORS': 'Please select an indicator',
+                     'LENGTH=0': 'Please select countries and indicator(s)'}
     if request.method == 'GET':
-        data = request.data
+        data = request.json
         conn = get_bank_connection()
-        query = "SELECT * fROM public.indicators WHERE countrycode IN ('ARB','GBR') AND indicatorcode='EN.ATM.CO2E.GF.ZS';"
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-            cursor.execute(query)
-            data = cursor.fetchall()
+        query = "SELECT value,year fROM public.indicators WHERE countrycode IN ('ARB','GBR') AND indicatorcode='EN.ATM.CO2E.GF.ZS';"
+        data = query_bank_db(query)
         conn.close()
 
         return jsonify(data)
+    if request.method == 'POST':
+        search = request.get_json()
+        print(search)
+        error_messsage = validate_data(search)
+        print(search['country'])
+        # Handling 1 country:
+        query_1 = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN (%s) AND indicatorname IN (%s)"
+        param_1_c = "Albania"
+        params = tuple(
+            [param_1_c, "Merchandise imports from developing economies in South Asia (% of total merchandise imports)"])
+        print(params)
+
+        db_results = query_bank_db(query_1, params)
+        print(db_results)
+
+        return jsonify(db_results)
 
 
 @app.route('/general', methods=['GET'])
