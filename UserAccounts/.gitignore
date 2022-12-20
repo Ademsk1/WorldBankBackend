@@ -5,3 +5,4 @@ UserAccounts
 Bcrypt
 .env
 __pycache__
+flask-cors
