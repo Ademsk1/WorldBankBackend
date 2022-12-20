@@ -1,0 +1,7 @@
+venv
+psycopg2
+flask
+UserAccounts
+Bcrypt
+.env
+__pycache__

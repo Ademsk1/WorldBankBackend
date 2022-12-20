@@ -1,6 +1,0 @@
-README.md
-setup.py
-UserAccountsAPI.egg-info/PKG-INFO
-UserAccountsAPI.egg-info/SOURCES.txt
-UserAccountsAPI.egg-info/dependency_links.txt
-UserAccountsAPI.egg-info/top_level.txt
