@@ -1,0 +1,4 @@
+venv
+psycopg2
+flask
+UserAccounts
