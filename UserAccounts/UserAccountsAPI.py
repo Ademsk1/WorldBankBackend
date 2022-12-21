@@ -13,7 +13,7 @@ def create_user(data):
         if not any(dictionary.get('username') == data[0]['name'] and compare_hashed_passwords(data[0]['password'], dictionary.get('salt'), dictionary.get('password')) for dictionary in check_stories1):
             hashed_result = (create_hash_password(data[0]['password']))
             send = db_select(conn_user_db, 'insert into user_table (username, password, type_id, salt) values (%s, %s, 1, %s) returning 1', ((data[0]['name']),(hashed_result[0]),(hashed_result[1])))
-            # return jsonify('user created')
+            return jsonify('user created')
         else:
             return jsonify('user is already in database')
 

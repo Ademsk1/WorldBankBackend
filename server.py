@@ -14,7 +14,6 @@ def getting_user():
         if(request.method == 'POST'):
             data = request.json
             return get_user_data(data)
-            #return get_data()
 
 
 
