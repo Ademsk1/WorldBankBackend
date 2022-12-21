@@ -42,7 +42,7 @@ def get_params(search):
 def get_bank_connection():
     try:
         conn = conn = psycopg2.connect(
-            f"dbname={WB_DBNAME} user={WB_USERNAME} host={WB_HOST} port = 5432 password={WB_PASSWORD}")
+            f"dbname={WB_DBNAME} user={WB_USERNAME} host={WB_HOST} port=5432 password={WB_PASSWORD}")
         return conn
     except:
         return False
@@ -59,16 +59,18 @@ def query_bank_db(query, params=()):
         except:
             return 'Error fetching from Database'
     else:
-        return 'No connection on conn'
+        return 'No connection to database'
 
 
 @app.route('/search', methods=['POST'])
 def search():
-    error_handler = {'OKAY': '', 'NOINDICATORS': 'Please select an indicator',
+    error_handler = {'None': 'Okay!', 'NOINDICATORS': 'Please select an indicator',
                      'LENGTH=0': 'Please select countries and indicator(s),', "NOTARRAY: country": 'Error on country array',
                      "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array'}
     if request.method == 'POST':
-        search = request.json
+        inp = jsonify({'country': ['Afghanistan', 'Albania'], 'indicator': [
+                      'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
+        search = inp.json
         error_message = error_handler[validate_input(search)]
         if error_message == '':
             query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
@@ -94,4 +96,4 @@ def get_general_info():
     if type(countries) != str and type(indicators) != str:
         return jsonify([countries, indicators])
     else:
-        return jsonify({'error': 'Querying error'})
+        return jsonify({'error': f'{countries}', 'status': 500})
