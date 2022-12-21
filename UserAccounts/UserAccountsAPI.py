@@ -18,13 +18,11 @@ def create_user(data): #handle empty input
             return format_response(200, 'user created')
         else:
             return format_response(400,'user is already in database')
-
-            check_stories2 = db_select(conn_user_db, 'select * from user_table')
-            return jsonify(check_stories2)
     except:
         return format_response(500, 'Error creating account')
 
 def get_user_data(data):
+    print(data,'--------------')
     try:
         check_stories1 = db_select(conn_user_db, 'select * from user_table')
         for user in check_stories1:
@@ -51,6 +49,8 @@ def compare_hashed_passwords(inputted_password, salt, saved_password):
 
 def format_response(code, message):
     return [{"status": code, "message": message}]
+
+
 
 
 
