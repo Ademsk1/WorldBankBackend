@@ -41,7 +41,10 @@ def query_bank_db(query, params=()):
     return data
 
 
-@app.route('/search', methods=['GET', 'POST'])  # POST
+@app.route('/search', methods=['GET', 'POST'])
+# TODO: Remove GET method
+#  FIX assignment of variables e.g. where to tuple, for how many countries etc.
+#   Figure out what kind of format JSON will be.
 def search():
     error_handler = {'OKAY': '', 'NOINDICATORS': 'Please select an indicator',
                      'LENGTH=0': 'Please select countries and indicator(s)'}
