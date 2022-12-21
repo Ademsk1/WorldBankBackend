@@ -1,10 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 import os
 import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 from flask_cors import CORS
-
+import json
 
 load_dotenv()
 app = Flask(__name__)
@@ -16,12 +16,19 @@ WB_PASSWORD = os.getenv('WB_PASSWORD')
 WB_USERNAME = os.getenv('WB_USERNAME')
 
 
-def validate_data(data):
+def validate_input(data):
     if len(data) == 0:
         return 'LENGTH=0'
     if len(data['indicator']) == 0:
         return 'NOINDICATORS'
-    return 'OKAY'
+    return 'None'
+
+
+def get_params(search):
+    country_params = tuple(search['country'])
+    indicator_params = tuple(search['indicator'])
+    params = tuple([country_params, indicator_params])
+    return params
 
 
 def get_bank_connection():
@@ -35,43 +42,35 @@ def get_bank_connection():
 
 def query_bank_db(query, params=()):
     conn = get_bank_connection()
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-        cursor.execute(query, params)
-        data = cursor.fetchall()
-    return data
+    if conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+            # ((list of countries),(list of indicators))
+            cursor.execute(query, params)
+            data = cursor.fetchall()
+        return data
+    else:
+        return 'No connection'
 
 
-@app.route('/search', methods=['GET', 'POST'])
-# TODO: Remove GET method
-#  FIX assignment of variables e.g. where to tuple, for how many countries etc.
-#   Figure out what kind of format JSON will be.
+@app.route('/send_picture')
+def send_picture():
+    return send_file('../shaggy.jpeg')
+
+
+@app.route('/search', methods=['POST'])
 def search():
     error_handler = {'OKAY': '', 'NOINDICATORS': 'Please select an indicator',
                      'LENGTH=0': 'Please select countries and indicator(s)'}
-    if request.method == 'GET':
-        data = request.json
-        conn = get_bank_connection()
-        query = "SELECT value,year fROM public.indicators WHERE countrycode IN ('ARB','GBR') AND indicatorcode='EN.ATM.CO2E.GF.ZS';"
-        data = query_bank_db(query)
-        conn.close()
-
-        return jsonify(data)
     if request.method == 'POST':
-        search = request.get_json()
-        print(search)
-        error_messsage = validate_data(search)
-        print(search['country'])
-        # Handling 1 country:
-        query_1 = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN (%s) AND indicatorname IN (%s)"
-        param_1_c = "Albania"
-        params = tuple(
-            [param_1_c, "Merchandise imports from developing economies in South Asia (% of total merchandise imports)"])
-        print(params)
-
-        db_results = query_bank_db(query_1, params)
-        print(db_results)
-
-        return jsonify(db_results)
+        inp = jsonify({'country': ['Afghanistan', 'Albania'], 'indicator': [
+                      'Merchandise imports from developing economies in South Asia (% of total merchandise imports)']})
+        search = inp.json
+        error_message = validate_input(search)
+        query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s"
+        params = get_params(search)
+        results = query_bank_db(query, params)
+        response = {'results': results, 'errors': error_message}
+        return jsonify(response)
 
 
 @app.route('/general', methods=['GET'])
