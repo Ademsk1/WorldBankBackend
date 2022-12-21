@@ -69,7 +69,7 @@ def search():
                      "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array'}
     if request.method == 'POST':
         search = request.json
-        error_message = validate_input(search)
+        error_message = error_handler[validate_input(search)]
         if error_message == 'None':
             query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
             print(search)
@@ -77,7 +77,6 @@ def search():
             results = query_bank_db(query, params)
             if type(results) != str:
                 plot_graph(results, search['indicator'])
-                response = {'results': results, 'errors': error_message}
                 return send_file('./world_bank_connect/plots/plot.png')
             else:
                 return jsonify({'error': results})
