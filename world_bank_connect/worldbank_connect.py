@@ -42,7 +42,7 @@ def get_params(search):
 def get_bank_connection():
     try:
         conn = conn = psycopg2.connect(
-            f"dbname=czreijar user=czreijar host=kandula.db.elephantsql.com port = 5432 password=TJ2StTuQIl2CoRoinQTwPxk8pBGfdf6t")
+            f"dbname={WB_DBNAME} user={WB_USERNAME} host={WB_HOST} port = 5432 password={WB_PASSWORD}")
         return conn
     except:
         return False
