@@ -4,7 +4,7 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 from flask_cors import CORS
-from plot_graphs import plot_graph
+from world_bank_connect.plot_graphs import plot_graph
 import json
 
 load_dotenv()
@@ -60,18 +60,20 @@ def search():
     error_handler = {'OKAY': '', 'NOINDICATORS': 'Please select an indicator',
                      'LENGTH=0': 'Please select countries and indicator(s)'}
     if request.method == 'POST':
-        # inp = jsonify({'country': ['Afghanistan', 'Albania'], 'indicator': [
-        #               'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '1999']})
-        search = request.json
+        inp = jsonify({'country': ['Afghanistan', 'Albania'], 'indicator': [
+                      'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
+        print(inp)
+        search = inp.json
         error_message = validate_input(search)
         start = search['range'][0]
         end = search['range'][1]
         query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
+        print(search)
         params = get_params(search)
         results = query_bank_db(query, params)
         plot_graph(results, search['indicator'])
         response = {'results': results, 'errors': error_message}
-        return send_file('./plots/plot.png')
+        return send_file('./world_bank_connect/plots/plot.png')
 
 
 @app.route('/general', methods=['GET'])

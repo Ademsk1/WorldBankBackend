@@ -31,4 +31,4 @@ def plot_graph(results, indicator):
         y = []
     ax.legend()
     ax.grid()
-    fig.savefig('./plots/plot.png')
+    fig.savefig('./world_bank_connect/plots/plot.png')

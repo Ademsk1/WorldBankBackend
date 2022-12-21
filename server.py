@@ -2,7 +2,7 @@ from flask import Flask, current_app, jsonify, request
 from UserAccounts.UserAccountsAPI import *
 from flask_cors import CORS
 from world_bank_connect.worldbank_connect import *
-
+from world_bank_connect.plot_graphs import *
 
 app = Flask(__name__)
 CORS(app, origins='https://localhost:3000')
