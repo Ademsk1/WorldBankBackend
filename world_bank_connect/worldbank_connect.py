@@ -68,9 +68,7 @@ def search():
                      'LENGTH=0': 'Please select countries and indicator(s),', "NOTARRAY: country": 'Error on country array',
                      "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array'}
     if request.method == 'POST':
-        inp = jsonify({'country': ['Afghanistan', 'Albania'], 'indicator': [
-                      'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
-        search = inp.json
+        search = request.json
         error_message = validate_input(search)
         if error_message == 'None':
             query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
