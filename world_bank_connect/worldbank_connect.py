@@ -22,6 +22,11 @@ def validate_input(data):
         return 'LENGTH=0'
     if len(data['indicator']) == 0:
         return 'NOINDICATORS'
+    if len(data['country']) == 0:
+        return 'NOCOUNTRY'
+    for key in data:
+        if type(data[key]) != list:
+            return f'NOTARRAY: {key}'
     return 'None'
 
 
@@ -46,11 +51,13 @@ def get_bank_connection():
 def query_bank_db(query, params=()):
     conn = get_bank_connection()
     if conn:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-            # ((list of countries),(list of indicators))
-            cursor.execute(query, params)
-            data = cursor.fetchall()
-        return data
+        try:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute(query, params)
+                data = cursor.fetchall()
+            return data
+        except:
+            return 'Error fetching from Database'
     else:
         return 'No connection'
 
@@ -58,22 +65,26 @@ def query_bank_db(query, params=()):
 @app.route('/search', methods=['POST'])
 def search():
     error_handler = {'OKAY': '', 'NOINDICATORS': 'Please select an indicator',
-                     'LENGTH=0': 'Please select countries and indicator(s)'}
+                     'LENGTH=0': 'Please select countries and indicator(s),', "NOTARRAY: country": 'Error on country array',
+                     "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array'}
     if request.method == 'POST':
         inp = jsonify({'country': ['Afghanistan', 'Albania'], 'indicator': [
                       'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
-        print(inp)
         search = inp.json
         error_message = validate_input(search)
-        start = search['range'][0]
-        end = search['range'][1]
-        query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
-        print(search)
-        params = get_params(search)
-        results = query_bank_db(query, params)
-        plot_graph(results, search['indicator'])
-        response = {'results': results, 'errors': error_message}
-        return send_file('./world_bank_connect/plots/plot.png')
+        if error_message == 'None':
+            query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
+            print(search)
+            params = get_params(search)
+            results = query_bank_db(query, params)
+            if type(results) != str:
+                plot_graph(results, search['indicator'])
+                response = {'results': results, 'errors': error_message}
+                return send_file('./world_bank_connect/plots/plot.png')
+            else:
+                return jsonify({'error': results})
+        else:
+            return jsonify({'error': error_message})
 
 
 @app.route('/general', methods=['GET'])
@@ -81,14 +92,9 @@ def get_general_info():
     conn = get_bank_connection()
     query_countries = "SELECT tablename from public.countries;"
     query_indicators = "SELECT indicatorname from public.series;"
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-        cursor.execute(query_countries)
-        countries = cursor.fetchall()
-        cursor.execute(query_indicators)
-        indicators = cursor.fetchall()
-        print(query_countries)
-    return jsonify([countries, indicators])
-
-
-# if __name__ == '__main__':
-#     app.run(debug=True, port='5000')
+    countries = query_bank_db(query_countries)
+    indicators = query_bank_db(query_indicators)
+    if type(countries) != str and type(indicators) != str:
+        return jsonify([countries, indicators])
+    else:
+        return jsonify({'error': 'Querying error'})
