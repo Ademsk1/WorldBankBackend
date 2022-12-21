@@ -10,12 +10,12 @@ USER = os.getenv('USER')
 
 def get_db_user_connection():
     try:
-        conn = psycopg2.connect(f"dbname=backvrlw user=backvrlw host=mel.db.elephantsql.com port = 5432 password={PASS}")
+        conn = psycopg2.connect("dbname=backvrlw user=backvrlw host=mel.db.elephantsql.com port=5432 password={PASS}")
         return conn
     except:
         print('couldnt connect to server')
 
-def db_select(conn ,query, parameters=()):
+def db_select(conn, query, parameters=()):
     if conn != None:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             # try:

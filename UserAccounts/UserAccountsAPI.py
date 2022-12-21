@@ -4,6 +4,7 @@ from UserAccounts.connections import db_select, get_db_user_connection
 
 
 conn_user_db = get_db_user_connection()
+print(conn_user_db)
 
 
 def create_user(data):
@@ -22,14 +23,18 @@ def create_user(data):
 
 def get_user_data(data):
     try:
+        print(data)
         check_stories1 = db_select(conn_user_db, 'select * from user_table')
+       
         for user in check_stories1:
+            print(check_stories1)
             if(user['username'] == data[0]['name'] and compare_hashed_passwords(data[0]['password'], user.get('salt'), user.get('password'))):
+                print('test')
                 check_stories2 = db_select(conn_user_db, 'select * from user_table where username=%s and password=%s', ((user['username']),(user['password'])))
                 return jsonify(check_stories2)
-        return 'user was not found'
+        return jsonify('user was not found')
     except:
-        'Error Fetching User'
+        return jsonify('Error Fetching User')
 
 
 

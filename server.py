@@ -4,9 +4,9 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app, origins='https://localhost:3000')
+CORS(app, origins='http://localhost:3000')
 
-@app.route('/get_user', methods = ['GET', 'POST'])
+@app.route('/get_user', methods = ['POST'])
 def getting_user(): 
         if(request.method == 'POST'):
             data = request.json
@@ -15,7 +15,7 @@ def getting_user():
 
 
 
-@app.route('/create_user', methods= ['GET','POST'])
+@app.route('/create_user', methods= ['POST'])
 def creating_user():
     if(request.json == 'POST'):
         data = request.json
