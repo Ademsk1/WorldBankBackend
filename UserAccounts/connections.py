@@ -18,12 +18,12 @@ def get_db_user_connection():
 def db_select(conn ,query, parameters=()):
     if conn != None:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            try:
+            # try:
                 cur.execute(query, parameters)
                 data = cur.fetchall()
                 conn.commit()
                 return data            
-            except:
-                return "Error executing query."
+            # except:
+            #     return "Error executing query."
     else:
         return "No connection"
