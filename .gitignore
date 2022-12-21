@@ -11,3 +11,5 @@ world-bank-connect/venv
 python-dotenv
 world-bank-connect/.env
 flask-cors
+numpy
+matplotlib
