@@ -42,7 +42,7 @@ def get_params(search):
 def get_bank_connection():
     try:
         conn = conn = psycopg2.connect(
-            f"dbname={WB_DBNAME} user={WB_USERNAME} host={WB_HOST} port = 5432 password={WB_PASSWORD}")
+            f"dbname=czreijar user=czreijar host=kandula.db.elephantsql.com port = 5432 password=TJ2StTuQIl2CoRoinQTwPxk8pBGfdf6t")
         return conn
     except:
         return False
@@ -70,7 +70,7 @@ def search():
     if request.method == 'POST':
         search = request.json
         error_message = error_handler[validate_input(search)]
-        if error_message == 'None':
+        if error_message == '':
             query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
             print(search)
             params = get_params(search)
