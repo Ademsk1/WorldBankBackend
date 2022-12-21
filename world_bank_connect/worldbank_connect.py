@@ -70,7 +70,7 @@ def search():
     if request.method == 'POST':
         search = request.json
         error_message = error_handler[validate_input(search)]
-        if error_message == 'None':
+        if error_message == '':
             query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
             print(search)
             params = get_params(search)
