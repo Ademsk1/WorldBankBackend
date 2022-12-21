@@ -4,3 +4,6 @@ python-dotenv
 flask-cors
 matplotlib
 textwrap
+psycopg2
+flask
+bcrypt
