@@ -64,7 +64,7 @@ def query_bank_db(query, params=()):
 
 @app.route('/search', methods=['POST'])
 def search():
-    error_handler = {'None': 'Okay!', 'NOINDICATORS': 'Please select an indicator',
+    error_handler = {'None': '', 'NOINDICATORS': 'Please select an indicator',
                      'LENGTH=0': 'Please select countries and indicator(s),', "NOTARRAY: country": 'Error on country array',
                      "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array'}
     if request.method == 'POST':
