@@ -59,7 +59,7 @@ def query_bank_db(query, params=()):
         except:
             return 'Error fetching from Database'
     else:
-        return 'No connection on conn'
+        return 'No connection'
 
 
 @app.route('/search', methods=['POST'])
