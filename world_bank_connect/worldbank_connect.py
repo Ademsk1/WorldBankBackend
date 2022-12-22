@@ -66,7 +66,6 @@ def convert_data(results, search):
             if data_el['year']==year:
                 data_dict[indicator][i][result['countryname']]=result['value']
                 break
-
     return data_dict
 
 
