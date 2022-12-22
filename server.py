@@ -33,6 +33,12 @@ def general_info():
 def search_query():
     return search()
 
+@app.route('/create_session', methods=['POST'])
+def creating_user_session():
+    # data = request.json
+    data = {"user_id":"2", "country": ["Bulgaria", "France"], "indicator": ["Merchandise imports from developing economies in South Asia (% of total merchandise imports)"], "range": ["1964", "2020"]}
+    return create_user_session(data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

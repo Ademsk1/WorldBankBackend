@@ -1,6 +1,8 @@
 from flask import jsonify
+import json
 import bcrypt
 from UserAccounts.connections import db_select, get_db_user_connection
+
 
 
 conn_user_db = get_db_user_connection()
@@ -22,7 +24,6 @@ def create_user(data): #handle empty input
         return format_response(500, 'Error creating account')
 
 def get_user_data(data):
-    print(data,'--------------')
     try:
         check_stories1 = db_select(conn_user_db, 'select * from user_table')
         for user in check_stories1:
@@ -45,16 +46,31 @@ def create_hash_password(password):
 
 
 def compare_hashed_passwords(inputted_password, salt, saved_password):
-    print('inputted password - ', inputted_password)
-    print('encoded inputted password - ', inputted_password.encode('utf-8'))
-    print('Decoded saved password ', saved_password)
-    print('Encoded saved password ', saved_password.encode('utf-8'))
     return bcrypt.checkpw(inputted_password.encode('UTF-8'), saved_password.encode('UTF-8'))
 
 def format_response(code, message):
     return [{"status": code, "message": message}]
 
 
+def create_user_session(data):
+    user = [{'name':'mike', 'password':'test'}]
+    # user = ' '.join(map(str,(data['user'])))
+    countries = ' '.join(map(str,(data['country'])))
+    indicator = ' '.join(map(str,(data['indicator'])))
+    range = ' '.join(map(str,(data['range'])))
+    print(countries)
+    print(indicator)
+    print(user)
+    retrieved_user = get_user_data(user)
+    print('is this empty', retrieved_user[0]['id'])
+    if(user not in [format_response(404,'user was not found'), format_response(500, 'Error Fetching User')]):
+        session_id = db_select(conn_user_db, 'insert into sessions (user_id, countries, indicators, range) values (%s, %s, %s, %s) returning id', ((retrieved_user[0]['id']),(countries),(indicator),(range)))
+        return format_response(200, session_id)
+    else:
+         return format_response(500, 'error adding user')
+
+def get_user_session(data):
+    pass
 
 
 
