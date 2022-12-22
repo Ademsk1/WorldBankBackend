@@ -4,7 +4,8 @@ import json
 from UserAccounts.connections import db_select, get_db_user_connection
 from world_bank_connect.worldbank_connect import get_bank_connection
 
-from flask import Flask
+from flask import Flask, jsonify
+import json
 
 app = Flask(__name__)
 
@@ -19,9 +20,7 @@ def test_search_valid_input():
                         'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']}
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
-        responseJson = response
         assert response.status_code == 200
-        # assert responseJson == 'None'
 
 def test_search_no_country_entered():
     with app.app_context(): 
@@ -29,10 +28,8 @@ def test_search_no_country_entered():
                       'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']}
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
-        responseJson = response
-        print('response is -> ', response.content.decode())
-        assert response.status_code == 500
-        # assert str(response.content.decode()).find('NOCOUNTRY') == 'NOCOUNTRY'
+        responseJson = json.loads(response.text)
+        assert responseJson['error'] == "Please input a country"
 
 def test_search_error_checking_invalid_country():
     with app.app_context(): 
@@ -40,9 +37,8 @@ def test_search_error_checking_invalid_country():
                       'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
-        responseJson = response
         assert response.status_code == 500
-        # assert responseJson == 'NOTARRAY: country'
+        # assert 'respons' == 'NOTARRAY: country'
 
 def test_search_error_checking_invalid_indicator():
     with app.app_context(): 
@@ -50,7 +46,6 @@ def test_search_error_checking_invalid_indicator():
                       'Merchandise imports from developing economies in South Asia (% of total merchandise imports)', 'range': ['1964', '2020']})
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
-        responseJson = response
         assert response.status_code == 500
         # assert responseJson == 'NOTARRAY: indicator'
 
@@ -125,3 +120,58 @@ def test_get_user() :
         assert response.status_code == 200
         assert responseJson == allusers
         
+def test_creating_user_session_success():
+    with app.app_context():
+        data = {"user_id":"4", "country": [" KINGDOM ", "England"], "indicator": ["Merchandise imports from developing economies in South Asia (% of total merchandise imports)"], "range": ["1960", "2022"]}
+        path = "/create_session"
+        response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
+        responseJson = json.loads(response.text)
+        assert response.status_code == 200
+        assert responseJson[0]['message'] == 'new session created'
+
+def test_creating_user_session_no_user():
+    with app.app_context():
+        data = {"user_id":"22", "country": [" KINGDOM ", "England"], "indicator": ["Merchandise imports from developing economies in South Asia (% of total merchandise imports)"], "range": ["1960", "2022"]}
+        path = "/create_session"
+        response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
+        responseJson = json.loads(response.text)
+        assert response.status_code == 400
+        assert responseJson[0]['message'] == 'error adding session'
+
+def test_getting_user_session_invalid_user():
+    with app.app_context():
+        data = {"user_id":"22"}
+        path = "/get_session"
+        response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
+        responseJson = json.loads(response.text)
+        assert response.status_code == 404
+        assert responseJson == []
+
+def test_getting_user_session_for_user():
+    with app.app_context():
+        data = {"user_id":"2"}
+        path = "/get_session"
+        response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
+        responseJson = json.loads(response.text)
+        assert response.status_code == 200
+        assert responseJson == [
+    {
+        "countries": " KINGDOM  England",
+        "date": "Thu, 22 Dec 2022 18:41:03 GMT",
+        "indicators": "Merchandise imports from developing economies in South Asia (% of total merchandise imports)",
+        "range": "1960 2022"
+    },
+    {
+        "countries": " KINGDOM  England",
+        "date": "Thu, 22 Dec 2022 18:53:52 GMT",
+        "indicators": "Merchandise imports from developing economies in South Asia (% of total merchandise imports)",
+        "range": "1960 2022"
+    }
+]
+
+def test_getting_user_session_for_admin():
+    with app.app_context():
+        data = {"user_id":"5"}
+        path = "/get_session"
+        response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
+        assert response.status_code == 200

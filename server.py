@@ -33,6 +33,16 @@ def general_info():
 def search_query():
     return search()
 
+@app.route('/create_session', methods=['POST'])
+def creating_user_session():
+    data = request.json
+    return create_user_session(data)
+
+@app.route('/get_session', methods=['POST'])
+def getting_user_session():
+    data = request.json
+    return get_user_session(data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
