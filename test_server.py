@@ -1,18 +1,12 @@
 from server import getting_user
 import requests
 import json
-from flask import jsonify, make_response
 from UserAccounts.connections import db_select, get_db_user_connection
-import psycopg2
-import psycopg2.extras
 from world_bank_connect.worldbank_connect import get_bank_connection
 
-from flask import Flask, current_app
+from flask import Flask
 
 app = Flask(__name__)
-with app.app_context():
-    # within this block, current_app points to app.
-    print (current_app.name)
 
 
 baseUrl = "http://127.0.0.1:5000"
