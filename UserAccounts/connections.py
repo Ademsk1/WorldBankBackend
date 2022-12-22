@@ -15,6 +15,8 @@ def get_db_user_connection():
     except:
         print('couldnt connect to server')
 
+
+
 def db_select(conn ,query, parameters=()):
     if conn != None:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
