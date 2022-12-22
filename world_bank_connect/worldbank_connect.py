@@ -55,7 +55,6 @@ def convert_data(results, search):
         data_dict[indicator] = {}
         for country in country_list:
             data_dict[indicator][country] = []
-    print(data_dict)
     for result in results:
         indicator = result['indicatorname']
         country = result['countryname']
@@ -86,7 +85,6 @@ def search():
                      "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array', 'NOCOUNTRY': 'Please input a country'}
     if request.method == 'POST':
         search = request.json
-        print(search)
         error_message = error_handler[validate_input(search)]
         if error_message == '':
             query = "SELECT indicatorname,countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
