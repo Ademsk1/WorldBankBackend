@@ -45,6 +45,10 @@ def create_hash_password(password):
 
 
 def compare_hashed_passwords(inputted_password, salt, saved_password):
+    print('inputted password - ', inputted_password)
+    print('encoded inputted password - ', inputted_password.encode('utf-8'))
+    print('Decoded saved password ', saved_password)
+    print('Encoded saved password ', saved_password.encode('utf-8'))
     return bcrypt.checkpw(inputted_password.encode('UTF-8'), saved_password.encode('UTF-8'))
 
 def format_response(code, message):

@@ -1,7 +1,6 @@
 from server import getting_user
 import requests
 import json
-import jsonpath
 from flask import jsonify, make_response
 from UserAccounts.connections import db_select, get_db_user_connection
 import psycopg2
@@ -22,51 +21,44 @@ connW = get_bank_connection()
 
 def test_search_valid_input():
     with app.app_context(): 
-        data=json.dumps({'country': ['Afghanistan', 'Albania'], 'indicator': [
-                        'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
-        print(data)
+        data={'country': ['Afghanistan', 'Albania'], 'indicator': [
+                        'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']}
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
         responseJson = response
-        print(responseJson)
         assert response.status_code == 200
-        assert responseJson == 'None'
+        # assert responseJson == 'None'
 
 def test_search_no_country_entered():
     with app.app_context(): 
-        data=json.dumps({'country': [], 'indicator': [
-                      'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
-        print(data)
+        data={'country': [], 'indicator': [
+                      'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']}
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
         responseJson = response
-        print(responseJson)
-        assert response.status_code == 200
-        assert responseJson == 'No Country'
+        print('response is -> ', response.content.decode())
+        assert response.status_code == 500
+        # assert str(response.content.decode()).find('NOCOUNTRY') == 'NOCOUNTRY'
 
 def test_search_error_checking_invalid_country():
     with app.app_context(): 
         data=json.dumps({'country': 'Afghanistan', 'indicator': [
                       'Merchandise imports from developing economies in South Asia (% of total merchandise imports)'], 'range': ['1964', '2020']})
-        print(data)
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
         responseJson = response
-        print(responseJson)
-        assert response.status_code == 200
-        assert responseJson == 'NOTARRAY: country'
+        assert response.status_code == 500
+        # assert responseJson == 'NOTARRAY: country'
 
 def test_search_error_checking_invalid_indicator():
     with app.app_context(): 
         data=json.dumps({'country': ['Afghanistan', 'Albania'], 'indicator': 
                       'Merchandise imports from developing economies in South Asia (% of total merchandise imports)', 'range': ['1964', '2020']})
-        print(data)
         path = "/search"
         response = requests.post(url=baseUrl+path, headers={"Content-type": "application/json"},json= data)
         responseJson = response
-        print(responseJson)
-        assert response.status_code == 200
-        assert responseJson == 'NOTARRAY: indicator'
+        assert response.status_code == 500
+        # assert responseJson == 'NOTARRAY: indicator'
 
 def test_checking_general_output():
     with app.app_context(): 
