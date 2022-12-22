@@ -2,8 +2,6 @@ psycopg
 psycopg2-binary
 python-dotenv
 flask-cors
-matplotlib
-textwrap
 psycopg2
 flask
 bcrypt

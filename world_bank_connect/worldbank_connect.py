@@ -4,7 +4,6 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 from flask_cors import CORS
-from world_bank_connect.plot_graphs import plot_graph
 import json
 
 load_dotenv()
