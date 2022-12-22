@@ -20,6 +20,7 @@ def plot_graph(results, indicator):
                 [year, value])
     x = []
     y = []
+    print(dict_data)
     for key in dict_data:
         for datapoint in dict_data[key]:
             x.append(datapoint[0])
