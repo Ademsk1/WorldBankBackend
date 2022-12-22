@@ -48,19 +48,24 @@ def get_bank_connection():
 
 
 def convert_data(results, search):
+    print(results)
     country_list = search['country']
     indicator_list = search['indicator']
     data_dict = {}
+    oldest_year = results[0]['year']
+    newest_year = results[-1]['year']
     for indicator in indicator_list:
-        data_dict[indicator] = {}
-        for country in country_list:
-            data_dict[indicator][country] = []
+        data_dict[indicator]=[]
+        for year in range(oldest_year,newest_year):
+            data_dict[indicator].append({'year':year})
     for result in results:
         indicator = result['indicatorname']
-        country = result['countryname']
         year = result['year']
         value = result['value']
-        data_dict[indicator][country].append({'year': year, 'value': value})
+        for i,data_el in enumerate(data_dict[indicator]):
+            if data_el['year']==year:
+                data_dict[indicator][i][result['countryname']]=result['value']
+                break
     return data_dict
 
 
