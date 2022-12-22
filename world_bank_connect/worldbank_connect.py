@@ -4,7 +4,6 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 from flask_cors import CORS
-from world_bank_connect.plot_graphs import plot_graph
 import json
 
 load_dotenv()
@@ -48,6 +47,23 @@ def get_bank_connection():
         return False
 
 
+def convert_data(results, search):
+    country_list = search['country']
+    indicator_list = search['indicator']
+    data_dict = {}
+    for indicator in indicator_list:
+        data_dict[indicator] = {}
+        for country in country_list:
+            data_dict[indicator][country] = []
+    for result in results:
+        indicator = result['indicatorname']
+        country = result['countryname']
+        year = result['year']
+        value = result['value']
+        data_dict[indicator][country].append({'year': year, 'value': value})
+    return data_dict
+
+
 def query_bank_db(query, params=()):
     conn = get_bank_connection()
     if conn:
@@ -66,18 +82,17 @@ def query_bank_db(query, params=()):
 def search():
     error_handler = {'None': '', 'NOINDICATORS': 'Please select an indicator',
                      'LENGTH=0': 'Please select countries and indicator(s),', "NOTARRAY: country": 'Error on country array',
-                     "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array'}
+                     "NOTARRAY: indicator": 'Error on indicator array', "NOTARRAY: range": 'Error on range array', 'NOCOUNTRY': 'Please input a country'}
     if request.method == 'POST':
         search = request.json
         error_message = error_handler[validate_input(search)]
         if error_message == '':
-            query = "SELECT countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
-            print(search)
+            query = "SELECT indicatorname,countryname,value,year FROM public.indicators WHERE countryname IN %s AND indicatorname IN %s AND year BETWEEN %s AND %s"
             params = get_params(search)
             results = query_bank_db(query, params)
+            formatted_results = convert_data(results, search)
             if type(results) != str:
-                plot_graph(results, search['indicator'])
-                return send_file('./world_bank_connect/plots/plot.png')
+                return jsonify(formatted_results)
             else:
                 return jsonify({'error': results})
         else:
