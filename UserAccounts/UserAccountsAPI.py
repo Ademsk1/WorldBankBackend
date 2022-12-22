@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, Response
 import json
 import bcrypt
 from UserAccounts.connections import db_select, get_db_user_connection
@@ -29,10 +29,10 @@ def get_user_data(data):
         for user in check_stories1:
             if(user['username'] == data[0]['name'] and compare_hashed_passwords(data[0]['password'], user.get('salt'), user.get('password'))):
                 check_stories2 = db_select(conn_user_db, 'select * from user_table where username=%s and password=%s', ((user['username']),(user['password'])))
-                return jsonify(check_stories2)
-        return format_response(404,'user was not found')
+                return jsonify(check_stories2), 200
+        return format_response(404,'user was not found'), 404
     except:
-        return format_response(500, 'Error Fetching User')
+        return format_response(500, 'Error Fetching User'), 500
 
 def get_data():
     check_stories1 = db_select(conn_user_db, 'select * from user_table')
@@ -53,24 +53,27 @@ def format_response(code, message):
 
 
 def create_user_session(data):
-    user = [{'name':'mike', 'password':'test'}]
-    # user = ' '.join(map(str,(data['user'])))
+    user = ''.join(map(str,(data['user_id'])))
     countries = ' '.join(map(str,(data['country'])))
     indicator = ' '.join(map(str,(data['indicator'])))
     range = ' '.join(map(str,(data['range'])))
-    print(countries)
-    print(indicator)
-    print(user)
-    retrieved_user = get_user_data(user)
-    print('is this empty', retrieved_user[0]['id'])
-    if(user not in [format_response(404,'user was not found'), format_response(500, 'Error Fetching User')]):
-        session_id = db_select(conn_user_db, 'insert into sessions (user_id, countries, indicators, range) values (%s, %s, %s, %s) returning id', ((retrieved_user[0]['id']),(countries),(indicator),(range)))
-        return format_response(200, session_id)
+
+    if(db_select(conn_user_db, 'select exists(select 1 from sessions where user_id = %s)', ((user),))[0]['exists'] == True):
+        db_select(conn_user_db, 'insert into sessions (user_id, countries, indicators, range, date) values (%s, %s, %s, %s, current_timestamp) returning id', ((user),(countries),(indicator),(range)))
+        return format_response(200, 'new session created'), 200
     else:
-         return format_response(500, 'error adding user')
+        return format_response(500, 'error adding session'), 400
 
 def get_user_session(data):
-    pass
+    find_user = db_select(conn_user_db, 'select type_id from user_table where id = %s', ((data['user_id']),))
 
+    if(len(find_user) < 1):
+        return [], 404
+    elif(find_user[0]['type_id'] == 2):
+        sessions_list = db_select(conn_user_db, 'select countries, indicators, range, username, date from sessions join user_table on sessions.user_id = user_table.id', ((data['user_id']),))
+    elif(find_user[0]['type_id'] == 1):
+        sessions_list = db_select(conn_user_db, 'select countries, indicators, range, date from sessions where user_id = %s', ((data['user_id']),))
+
+    return sessions_list, 200
 
 
