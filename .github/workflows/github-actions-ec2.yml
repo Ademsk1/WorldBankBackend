@@ -1,0 +1,21 @@
+name: Push Backend to EC2
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy Backend to EC2
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout files
+        uses: actions/checout@v2
+
+      - name: Deploy Backend
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
+          REMOTE_HOST: ${{secrets.HOST_DNS}}
+          REMOTE_USER: ${{secrets.USERNAME}}
+          TARGET: ${{secrets.TARGET_DIR}}
